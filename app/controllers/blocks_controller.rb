@@ -19,10 +19,8 @@ class BlocksController < ApplicationController
       params[:props].map do |prop|
         block.props.create(
           name: prop[:name],
-          title: prop[:title],
-          prop_type: prop[:prop_type],
-          default: prop[:default],
-          description: prop[:description]
+          value: prop[:value],
+          default_prop_id: prop[:default_prop_id]
         )
       end
       render json: block, status: :created
@@ -46,16 +44,6 @@ class BlocksController < ApplicationController
     if block
       block.update(block_params)
       if block.valid?
-        Rails.logger.info(params[:props])
-        params[:props].map do |prop|
-        block.props.create(
-          name: prop[:name],
-          title: prop[:title],
-          prop_type: prop[:prop_type],
-          default: prop[:default],
-          description: prop[:description]
-        )
-      end
         render json: block
       else
         render json: block.errors, status: :unprocessable_entity
@@ -85,11 +73,11 @@ class BlocksController < ApplicationController
   end
 
   def block_with_children(block)
-    children = Block.where(parent_block_id: block.id)
+    children = Block.where(parent_block_id: block.id).order(:order)
 
     children_json = children.map { |child| block_with_children(child) }
 
-    block_json = block.as_json(include: [ :props, { component: { include: :props } } ])
+    block_json = block.as_json(include: [ :props, { component: { include: :default_props } } ])
     block_json.merge!(children: children_json) if children.any?
     block_json
   end

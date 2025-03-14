@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_27_111225) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_14_081029) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -67,7 +67,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_27_111225) do
     t.string "filename", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "children", default: false
     t.index ["filename"], name: "index_components_on_filename", unique: true
+  end
+
+  create_table "default_props", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "title", null: false
+    t.string "prop_type", null: false
+    t.string "default", null: false
+    t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "component_id"
+    t.index ["component_id"], name: "index_default_props_on_component_id"
   end
 
   create_table "pages", force: :cascade do |t|
@@ -79,24 +92,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_27_111225) do
   end
 
   create_table "props", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "title", null: false
-    t.string "prop_type", null: false
-    t.string "default", null: false
-    t.string "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "component_id"
+    t.string "name", null: false
+    t.string "value"
     t.integer "block_id"
+    t.integer "default_prop_id"
     t.index ["block_id"], name: "index_props_on_block_id"
-    t.index ["component_id"], name: "index_props_on_component_id"
+    t.index ["default_prop_id"], name: "index_props_on_default_prop_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "blocks", "blocks", column: "parent_block_id"
   add_foreign_key "blocks", "components"
-  add_foreign_key "blocks", "pages"
+  add_foreign_key "blocks", "pages", on_delete: :cascade
+  add_foreign_key "default_props", "components"
   add_foreign_key "props", "blocks"
-  add_foreign_key "props", "components"
 end

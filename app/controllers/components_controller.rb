@@ -1,12 +1,12 @@
 class ComponentsController < ApplicationController
   def index
-    render json: Component.all, include: :props
+    render json: Component.all, include: :default_props
   end
 
   def show
     component = Component.find_by(id: params[:id])
     if component
-      render json: component, include: :props
+      render json: component, include: :default_props
     else
       render json: { error: "Component not found" }, status: :not_found
     end
@@ -17,7 +17,7 @@ class ComponentsController < ApplicationController
 
     if component.save
       params[:schema].map do |prop|
-        component.props.create(
+        component.default_props.create(
           name: prop[:name],
           title: prop[:title],
           prop_type: prop[:prop_type],
@@ -57,6 +57,6 @@ class ComponentsController < ApplicationController
   end
 
   def component_params
-    params.require(:component).permit(:filename, :name, :schema)
+    params.require(:component).permit(:filename, :name, :children, :schema)
   end
 end
